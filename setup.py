@@ -25,20 +25,40 @@ from setuptools import find_packages
 from setuptools import setup
 
 
-COMPILE_ARGS = [
+COMPILE_ARGS = []
+if sys.platform.startswith('win'):
+  COMPILE_ARGS.extend([
+    "-DNOMINMAX",
+    "-D_LIBCPP_DISABLE_AVAILABILITY",
+    "-DWIN32_LEAN_AND_MEAN",
+    "-D_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS",
+    "-D_USE_MATH_DEFINES",
+    "/wd4018",
+    "/wd4244",
+    "/wd4267",
+    "/wd4291",
+    "/wd4305",
+    "/permissive-",
+    "/FS",
+    "/wd4819",
+    "/EHsc",
+    "/bigobj",
+    "-std:c++17",])
+else:
+  COMPILE_ARGS.extend([
     "-std=c++17",
     "-Wno-register",
     "-Wno-deprecated-declarations",
     "-Wno-unused-function",
     "-Wno-unused-local-typedefs",
     "-funsigned-char",
-]
+])
 if sys.platform.startswith("darwin"):
   COMPILE_ARGS.append("-stdlib=libc++")
   COMPILE_ARGS.append("-mmacosx-version-min=10.12")
 
 
-LIBRARIES = ["fstfarscript", "fstfar", "fstscript", "fst", "m", "dl"]
+LIBRARIES = ["fstfarscript", "fstfar", "fstscript", "fst", "dl"]
 
 
 pywrapfst = Extension(

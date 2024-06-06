@@ -179,8 +179,8 @@ cdef extern from "cdrewrite.h" \
   # TODO(wolfsonkin): Don't do this hack if Cython gets proper enum class
   # support: https://github.com/cython/cython/issues/1603
   ctypedef enum CDRewriteMode:
-    OBLIGATORY "fst::CDRewriteMode::OBLIGATORY"
-    OPTIONAL "fst::CDRewriteMode::OPTOINAL"
+    MODE_OBLIGATORY "fst::CDRewriteMode::MODE_OBLIGATORY"
+    MODE_OPTIONAL "fst::CDRewriteMode::MODE_OPTIONAL"
 
 
 cdef extern from "cdrewritescript.h" \

@@ -51,7 +51,7 @@ namespace fst {
 
 enum class CDRewriteDirection { LEFT_TO_RIGHT, RIGHT_TO_LEFT, SIMULTANEOUS };
 
-enum class CDRewriteMode { OBLIGATORY, OPTIONAL };
+enum class CDRewriteMode { MODE_OBLIGATORY, MODE_OPTIONAL };
 
 namespace internal {
 
@@ -92,14 +92,14 @@ class CDRewriteRule {
   // sigma is an FST specifying (the closure of) the alphabet for the resulting
   // transducer. The dir argument can be CDRewriteDirection::LEFT_TO_RIGHT,
   // CDRewriteDirection::RIGHT_TO_LEFT or CDRewriteDirection::SIMULTANEOUS; mode
-  // can be CDRewriteMode::OBLIGATORY or CDRewriteMode::OPTIONAL; sigma must be
+  // can be CDRewriteMode::MODE_OBLIGATORY or CDRewriteMode::MODE_OPTIONAL; sigma must be
   // an unweighted acceptor representing a bifix code.
   //
   // The error bit on the output FST is set if any argument does not satisfy the
   // preconditions.
   void Compile(const Fst<Arc> &sigma, MutableFst<Arc> *fst,
                CDRewriteDirection dir = CDRewriteDirection::LEFT_TO_RIGHT,
-               CDRewriteMode mode = CDRewriteMode::OBLIGATORY);
+               CDRewriteMode mode = CDRewriteMode::MODE_OBLIGATORY);
 
  private:
   enum class MarkerType { MARK = 1, CHECK = 2, CHECK_COMPLEMENT = 3 };
@@ -392,7 +392,7 @@ void CDRewriteRule<Arc>::MakeReplace(MutableFst<Arc> *fst,
   std::vector<std::pair<Label, Label>> initial_loops;
   std::vector<std::pair<Label, Label>> all_loops;
   switch (mode_) {
-    case CDRewriteMode::OBLIGATORY:
+    case CDRewriteMode::MODE_OBLIGATORY:
       all_loops.emplace_back(lbrace1_, 0);
       all_loops.emplace_back(lbrace2_, 0);
       all_loops.emplace_back(rbrace_, 0);
@@ -417,7 +417,7 @@ void CDRewriteRule<Arc>::MakeReplace(MutableFst<Arc> *fst,
           break;
       }
       break;
-    case CDRewriteMode::OPTIONAL:
+    case CDRewriteMode::MODE_OPTIONAL:
       all_loops.emplace_back(rbrace_, 0);
       initial_loops.emplace_back(rbrace_, 0);
       switch (dir_) {
@@ -482,7 +482,7 @@ typename Arc::Label CDRewriteRule<Arc>::MaxLabel(const Fst<Arc> &fst) {
 // is an FST specifying (the closure of) the alphabet for the resulting
 // transducer. dir can be CDRewriteDirection::LEFT_TO_RIGHT,
 // CDRewriteDirection::RIGHT_TO_LEFT or CDRewriteDirection::SIMULTANEOUS. mode
-// can be CDRewriteMode::OBLIGATORY or CDRewriteMode::OPTIONAL. sigma must be an
+// can be CDRewriteMode::MODE_OBLIGATORY or CDRewriteMode::MODE_OPTIONAL. sigma must be an
 // unweighted acceptor representing a bifix code.
 //
 // The error bit on the output FST is set if any argument does not satisfy the
@@ -554,7 +554,7 @@ void CDRewriteRule<Arc>::Compile(const Fst<Arc> &sigma, MutableFst<Arc> *fst,
       MakeFilter(*rho_, mutable_sigma, &r, MarkerType::MARK, {{0, rbrace_}},
                  true);
       switch (mode_) {
-        case CDRewriteMode::OBLIGATORY: {
+        case CDRewriteMode::MODE_OBLIGATORY: {
           VectorFst<Arc> phi_rbrace;  // Appends > after phi_, matches all >.
           ArcMap(*phi_, &phi_rbrace, imapper);
           IgnoreMarkers(&phi_rbrace, {{rbrace_, rbrace_}});
@@ -581,7 +581,7 @@ void CDRewriteRule<Arc>::Compile(const Fst<Arc> &sigma, MutableFst<Arc> *fst,
           Compose(c, l2, fst);
           break;
         }
-        case CDRewriteMode::OPTIONAL: {
+        case CDRewriteMode::MODE_OPTIONAL: {
           // Builds l filter.
           VectorFst<Arc> l;
           MakeFilter(*lambda_, mutable_sigma, &l, MarkerType::CHECK,
@@ -601,7 +601,7 @@ void CDRewriteRule<Arc>::Compile(const Fst<Arc> &sigma, MutableFst<Arc> *fst,
       MakeFilter(*lambda_, mutable_sigma, &l, MarkerType::MARK, {{0, rbrace_}},
                  false);
       switch (mode_) {
-        case CDRewriteMode::OBLIGATORY: {
+        case CDRewriteMode::MODE_OBLIGATORY: {
           VectorFst<Arc> rbrace_phi;  // Prepends > before phi, matches all >
           ArcMap(*phi_, &rbrace_phi, imapper);
           IgnoreMarkers(&rbrace_phi, {{rbrace_, rbrace_}});
@@ -628,7 +628,7 @@ void CDRewriteRule<Arc>::Compile(const Fst<Arc> &sigma, MutableFst<Arc> *fst,
           Compose(c, r2, fst);
           break;
         }
-        case CDRewriteMode::OPTIONAL: {
+        case CDRewriteMode::MODE_OPTIONAL: {
           // Builds r filter.
           VectorFst<Arc> r;
           MakeFilter(*rho_, mutable_sigma, &r, MarkerType::CHECK,
@@ -648,7 +648,7 @@ void CDRewriteRule<Arc>::Compile(const Fst<Arc> &sigma, MutableFst<Arc> *fst,
       MakeFilter(*rho_, mutable_sigma, &r, MarkerType::MARK, {{0, rbrace_}},
                  true);
       switch (mode_) {
-        case CDRewriteMode::OBLIGATORY: {
+        case CDRewriteMode::MODE_OBLIGATORY: {
           VectorFst<Arc> phi_rbrace;  // Appends > after phi, matches all >.
           ArcMap(*phi_, &phi_rbrace, imapper);
           IgnoreMarkers(&phi_rbrace, {{rbrace_, rbrace_}});
@@ -677,7 +677,7 @@ void CDRewriteRule<Arc>::Compile(const Fst<Arc> &sigma, MutableFst<Arc> *fst,
           Compose(c, replace, fst);
           break;
         }
-        case CDRewriteMode::OPTIONAL: {
+        case CDRewriteMode::MODE_OPTIONAL: {
           // Builds l filter.
           VectorFst<Arc> l;
           MakeFilter(*lambda_, mutable_sigma, &l, MarkerType::CHECK,
@@ -854,7 +854,7 @@ bool CDRewriteRule<Arc>::HasArcWithLabel(const Fst<Arc> &fst, Label label) {
 // otherwise. sigma is an FST specifying (the closure of) the alphabet
 // for the resulting transducer. dir can be CDRewriteDirection::LEFT_TO_RIGHT,
 // CDRewriteDirection::RIGHT_TO_LEFT or CDRewriteDirection::SIMULTANEOUS. mode
-// can be CDRewriteMode::OBLIGATORY or CDRewriteMode::OPTIONAL. sigma must be an
+// can be CDRewriteMode::MODE_OBLIGATORY or CDRewriteMode::MODE_OPTIONAL. sigma must be an
 // unweighted acceptor representing a bifix code.
 //
 // The error bit on the output FST is set if any argument does not satisfy the
@@ -864,7 +864,7 @@ void CDRewriteCompile(
     const Fst<Arc> &phi, const Fst<Arc> &psi, const Fst<Arc> &lambda,
     const Fst<Arc> &rho, const Fst<Arc> &sigma, MutableFst<Arc> *fst,
     CDRewriteDirection dir = CDRewriteDirection::LEFT_TO_RIGHT,
-    CDRewriteMode mode = CDRewriteMode::OBLIGATORY, bool phiXpsi = true,
+    CDRewriteMode mode = CDRewriteMode::MODE_OBLIGATORY, bool phiXpsi = true,
     typename Arc::Label initial_boundary_marker = kNoLabel,
     typename Arc::Label final_boundary_marker = kNoLabel) {
   internal::CDRewriteRule<Arc> cdrule(phi, psi, lambda, rho, phiXpsi,
@@ -881,7 +881,7 @@ void CDRewriteCompile(
 // weighted acceptor. sigma is an FST specifying (the closure of) the alphabet
 // for the resulting transducer. dir can be CDRewriteDirection::LEFT_TO_RIGHT,
 // CDRewriteDirection::RIGHT_TO_LEFT or CDRewriteDirection::SIMULTANEOUS. mode
-// can be CDRewriteMode::OBLIGATORY or CDRewriteMode::OPTIONAL. sigma must be an
+// can be CDRewriteMode::MODE_OBLIGATORY or CDRewriteMode::MODE_OPTIONAL. sigma must be an
 // unweighted acceptor representing a bifix code.
 //
 // The error bit on the output FST is set if any argument does not satisfy the
@@ -891,7 +891,7 @@ void CDRewriteCompile(
     const Fst<Arc> &phi, const Fst<Arc> &psi, const Fst<Arc> &lambda,
     const Fst<Arc> &rho, const Fst<Arc> &sigma, MutableFst<Arc> *fst,
     CDRewriteDirection dir = CDRewriteDirection::LEFT_TO_RIGHT,
-    CDRewriteMode mode = CDRewriteMode::OBLIGATORY,
+    CDRewriteMode mode = CDRewriteMode::MODE_OBLIGATORY,
     typename Arc::Label initial_boundary_marker = kNoLabel,
     typename Arc::Label final_boundary_marker = kNoLabel) {
   CDRewriteCompile(phi, psi, lambda, rho, sigma, fst, dir, mode, false,
@@ -907,8 +907,8 @@ void CDRewriteCompile(
 // Lambda, and rho must be unweighted acceptors. sigma is an FST specifying (the
 // closure of) the alphabet for the resulting transducer. dir can be
 // CDRewriteDirection::LEFT_TO_RIGHT, CDRewriteDirection::RIGHT_TO_LEFT or
-// CDRewriteDirection::SIMULTANEOUS. mode can be CDRewriteMode::OBLIGATORY or
-// CDRewriteMode::OPTIONAL. sigma must be an unweighted acceptor representing a
+// CDRewriteDirection::SIMULTANEOUS. mode can be CDRewriteMode::MODE_OBLIGATORY or
+// CDRewriteMode::MODE_OPTIONAL. sigma must be an unweighted acceptor representing a
 // bifix code.
 //
 // The error bit on the output FST is set if any argument does not satisfy the
@@ -918,7 +918,7 @@ void CDRewriteCompile(
     const Fst<Arc> &tau, const Fst<Arc> &lambda, const Fst<Arc> &rho,
     const Fst<Arc> &sigma, MutableFst<Arc> *fst,
     CDRewriteDirection dir = CDRewriteDirection::LEFT_TO_RIGHT,
-    CDRewriteMode mode = CDRewriteMode::OBLIGATORY,
+    CDRewriteMode mode = CDRewriteMode::MODE_OBLIGATORY,
     typename Arc::Label initial_boundary_marker = kNoLabel,
     typename Arc::Label final_boundary_marker = kNoLabel) {
   VectorFst<Arc> phi(tau);
